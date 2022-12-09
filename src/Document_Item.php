@@ -755,13 +755,13 @@ class Document_Item extends CommonDBRelation
 
         $columns = [
             'name'      => __('Name'),
-            'entity'    => Entity::getTypeName(1),
+            // 'entity'    => Entity::getTypeName(1),
             'filename'  => __('File'),
-            'link'      => __('Web link'),
+            // 'link'      => __('Web link'),
             'headings'  => __('Heading'),
-            'mime'      => __('MIME type'),
-            'tag'       => __('Tag'),
-            'assocdate' => _n('Date', 'Dates', 1)
+            // 'mime'      => __('MIME type'),
+            // 'tag'       => __('Tag'),
+            // 'assocdate' => _n('Date', 'Dates', 1)
         ];
 
         if (isset($_GET["order"]) && ($_GET["order"] == "ASC")) {
@@ -892,28 +892,28 @@ class Document_Item extends CommonDBRelation
                     Html::showMassiveActionCheckBox(__CLASS__, $data["assocID"]);
                     echo "</td>";
                 }
-                echo "<td class='center'>$link</td>";
-                echo "<td class='center'>" . $data['entity'] . "</td>";
-                echo "<td class='center'>$downloadlink</td>";
-                echo "<td class='center'>";
-                if (!empty($data["link"])) {
-                    echo "<a target=_blank href='" . Toolbox::formatOutputWebLink($data["link"]) . "'>" . $data["link"];
-                    echo "</a>";
-                } else {
-                    echo "&nbsp;";
-                }
-                echo "</td>";
-                echo "<td class='center'>" . Dropdown::getDropdownName(
+                echo "<td >$link</td>";
+                // echo "<td class='center'>" . $data['entity'] . "</td>";
+                echo "<td >$downloadlink</td>";
+                // echo "<td class='center'>";
+                // if (!empty($data["link"])) {
+                //     echo "<a target=_blank href='" . Toolbox::formatOutputWebLink($data["link"]) . "'>" . $data["link"];
+                //     echo "</a>";
+                // } else {
+                //     echo "&nbsp;";
+                // }
+                // echo "</td>";
+                echo "<td>" . Dropdown::getDropdownName(
                     "glpi_documentcategories",
                     $data["documentcategories_id"]
                 );
                 echo "</td>";
-                echo "<td class='center'>" . $data["mime"] . "</td>";
-                echo "<td class='center'>";
-                echo !empty($data["tag"]) ? Document::getImageTag($data["tag"]) : '';
-                echo "</td>";
-                echo "<td class='center'>" . Html::convDateTime($data["assocdate"]) . "</td>";
-                echo "</tr>";
+                // echo "<td class='center'>" . $data["mime"] . "</td>";
+                // echo "<td class='center'>";
+                // echo !empty($data["tag"]) ? Document::getImageTag($data["tag"]) : '';
+                // echo "</td>";
+                // echo "<td class='center'>" . Html::convDateTime($data["assocdate"]) . "</td>";
+                // echo "</tr>";
                 $i++;
             }
             echo $header_begin . $header_bottom . $header_end;
