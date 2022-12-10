@@ -3,3 +3,4 @@ files/_log/*
 files/_sessions/*
 vendor/*
 files/*
+public/*
