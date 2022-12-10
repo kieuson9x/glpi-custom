@@ -798,6 +798,69 @@ class Document_Item extends CommonDBRelation
             ];
         }
 
+        // S_Change
+        // If item is computer
+        if ($item->getType() === 'Computer') {
+            $currentTab = strtolower($_SESSION['glpi_tabs']['computer'] ?? '');
+            // if tab is Document
+            if (strpos($currentTab, 'document_item') !== false) {
+                $users_id = $_SESSION['glpiID'];
+                $profile_name = $_SESSION['glpiactiveprofile']['name'] ?? null;
+
+                // if profile name is not super admin account
+                if (!in_array($profile_name, ['Super-Admin'])) {
+                    // map header with group name
+                    // hard code here
+
+                    $headingByGroups = [
+                        'Group 1' => ['heading1'],
+                        'Group 2' => ['header2'],
+                        'Group 3' => ['header3']
+                    ];
+
+                    // get list of current user's groups_id
+                    $currentGroupIterator = iterator_to_array($DB->request([
+                        'SELECT' => 'glpi_groups.name',
+                        'DISTINCT' => true,
+                        'FROM'   => 'glpi_groups_users',
+                        'JOIN' => [
+                            'glpi_groups' => [
+                                'ON' => [
+                                    'glpi_groups' => 'id',
+                                    'glpi_groups_users' => 'groups_id'
+                                ]
+                            ]
+                        ],
+                        'WHERE'  => [
+                            'glpi_groups_users.users_id' => $users_id // $users_id,
+                        ]
+                    ]));
+
+                    // get available headers
+                    $availableHeaders = [];
+                    foreach ($currentGroupIterator as $data) {
+                        // array_push($currentGroupsName, $data['name']);
+                        $header = $headingByGroups[$data['name']] ?? null;
+
+                        if ($header) {
+                            $availableHeaders = array_unique(array_merge($availableHeaders, $header));
+                        }
+                    }
+                    $owhere = $criteria['WHERE'];
+
+                    // where heading name in available headers
+                    $criteria['WHERE'] = [
+                        'AND' => [
+                            $owhere,
+                            'glpi_documentcategories.completename' => [
+                                'IN' => implode(',', $availableHeaders)
+                            ]
+                        ]
+                    ];
+                }
+            }
+        }
+
         $iterator = $DB->request($criteria);
         $number = count($iterator);
         $i      = 0;
