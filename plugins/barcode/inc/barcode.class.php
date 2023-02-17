@@ -204,26 +204,26 @@ class PluginBarcodeBarcode
    {
 
       $pbConfig = new PluginBarcodeConfig();
-
-      echo '<center>';
-      echo '<strong>';
-      echo __('It will generate only elements have defined field:', 'barcode') . ' ';
-      if (key($ma->items) == 'Ticket') {
-         echo __('Ticket number', 'barcode');
-      } else {
-         echo __('Inventory number');
-      }
-      echo '</strong>';
-      echo '<table>';
-      echo '<tr>';
-      echo '<td>';
-      $config = $pbConfig->getConfigType();
-      echo __('Type', 'barcode') . " : </td><td>";
-      $pbConfig->showTypeSelect($config['type'], ['QRcode' => 'QRcode']);
-      echo '</td>';
-      echo '</tr>';
-      echo '</table>';
-      echo '<br/>';
+      // Todo_S: An field cu o generate bar code modal
+      // echo '<center>';
+      // echo '<strong>';
+      // echo __('It will generate only elements have defined field:', 'barcode') . ' ';
+      // if (key($ma->items) == 'Ticket') {
+      //    echo __('Ticket number', 'barcode');
+      // } else {
+      //    echo __('Inventory number');
+      // }
+      // echo '</strong>';
+      // echo '<table>';
+      // echo '<tr>';
+      // echo '<td>';
+      // $config = $pbConfig->getConfigType();
+      // echo __('Type', 'barcode') . " : </td><td>";
+      // $pbConfig->showTypeSelect($config['type'], ['QRcode' => 'QRcode']);
+      // echo '</td>';
+      // echo '</tr>';
+      // echo '</table>';
+      // echo '<br/>';
 
       PluginBarcodeBarcode::commonShowMassiveAction();
    }
@@ -255,7 +255,7 @@ class PluginBarcodeBarcode
       echo '</td>';
       echo '<td>';
       echo __('Display border', 'barcode') . " : </td><td>";
-      Dropdown::showYesNo("border", 1, -1, ['width' => '100']);
+      Dropdown::showYesNo("border", 0, -1, ['width' => '100']);
       echo '</td>';
       echo '</tr>';
       echo '<tr>';
@@ -516,22 +516,37 @@ class PluginBarcodeBarcode
             $rand     = mt_rand();
             $number   = 0;
             $codes    = [];
-            if ($ma->POST['eliminate'] > 0) {
-               for ($nb = 0; $nb < $ma->POST['eliminate']; $nb++) {
-                  $codes[] = '';
-               }
-            }
+            // if ($ma->POST['eliminate'] > 0) {
+            //    for ($nb = 0; $nb < $ma->POST['eliminate']; $nb++) {
+            //       $codes[] = '';
+            //    }
+            // }
             foreach ($ids as $key) {
                $item->getFromDB($key);
                if (key($ma->items) == 'CommonITILObject') {
                   $codes[] = $item->getField('id');
-               } else if ($item->isField('otherserial')) {
+               } else if ($item->isField('otherserial') && $item->getType() !== 'Computer') {
                   $codes[] = $item->getField('otherserial');
                }
+
+               if ($item->getType() === 'Computer') {
+                  // Todo_S: Goi ham generateSimpleQRcode de generate ma QR
+                  $values = $pbQRcode->generateSimpleQRcode($item->getType(), $key, $rand, $number, $ma->POST);
+
+                  $filename    = $values[0];
+                  $displayData = $values[1];
+                  if ($filename) {
+                     $codes[] = $filename;
+                     $displayDataCollection[] = $displayData;
+                     $number++;
+                  }
+               }
             }
+            // Todo_S: Neu khong phai la bam generatebarcode o computer
             if (count($codes) > 0) {
                $params['codes']       = $codes;
-               $params['type']        = $ma->POST['type'];
+               $params['displayData'] = $displayDataCollection;
+               $params['type']        = $item->getType() === 'Computer' ? "QRcode" : $ma->POST['type'] ?? null;
                $params['size']        = $ma->POST['size'];
                $params['border']      = $ma->POST['border'];
                $params['orientation'] = $ma->POST['orientation'];

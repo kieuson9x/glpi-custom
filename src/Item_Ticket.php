@@ -189,6 +189,10 @@ class Item_Ticket extends CommonItilObject_Item
      **/
     public static function itemAddForm(Ticket $ticket, $options = [])
     {
+        // Todo_S: Tu che bien $custom_item_type thay the $params[itemtype]
+        $custom_item_type = $_GET['custom_item_type'] ?? null;
+        $custom_item_id = $_GET['custom_item_id'] ?? null;
+
         global $CFG_GLPI;
 
         $params = [
@@ -287,29 +291,41 @@ class Item_Ticket extends CommonItilObject_Item
             }
             // Global search
             ob_start();
-            self::dropdownAllDevices("itemtype", $params['itemtype'], 0, 1, $params['_users_id_requester'], $params['entities_id'], $p);
+            // Todo_S: Tu che bien $custom_item_type thay the $params[itemtype]
+            self::dropdownAllDevices("itemtype", !is_null($custom_item_type) ? $custom_item_type : $params['itemtype'], 0, 1, $params['_users_id_requester'], $params['entities_id'], $p);
             $twig_params['all_items_dropdown'] = ob_get_clean();
         }
 
         // Display list
-        if (!empty($params['items_id'])) {
+
+        // Todo_S: Fake $paramItemsId from custom params
+        $paramItemsId = $params['items_id'];
+        if ($custom_item_type && $custom_item_id) {
+            $paramItemsId = [
+                $custom_item_type => [
+                    0 => $custom_item_id
+                ]
+            ];
+        };
+
+        if (!empty($paramItemsId)) {
             // No delete if mandatory and only one item
             $delete = $ticket->canAddItem(__CLASS__);
             $cpt = 0;
-            foreach ($params['items_id'] as $itemtype => $items) {
+            foreach ($paramItemsId as $itemtype => $items) {
                 $cpt += count($items);
             }
 
             if ($cpt == 1 && isset($tt->mandatory['items_id'])) {
                 $delete = false;
             }
-            foreach ($params['items_id'] as $itemtype => $items) {
+            foreach ($paramItemsId as $itemtype => $items) {
                 foreach ($items as $items_id) {
                     $count++;
                     $twig_params['items_to_add'][] = self::showItemToAdd(
                         $params['id'],
-                        $itemtype,
-                        $items_id,
+                        !is_null($custom_item_type) ? $custom_item_type : $itemtype, // Todo_S: Tu che bien $custom_item_type thay the $itemtype
+                        !is_null($custom_item_id) ? $custom_item_id : $items_id, // Todo_S: Tu che bien $custom_item_id thay the $items_id,
                         [
                             'rand'      => $rand,
                             'delete'    => $delete,
@@ -348,6 +364,7 @@ class Item_Ticket extends CommonItilObject_Item
         if ($item = getItemForItemtype($itemtype)) {
             if ($params['visible']) {
                 $item->getFromDB($items_id);
+
                 $result =  "<div id='{$itemtype}_$items_id'>";
                 $result .= $item->getTypeName(1) . " : " . $item->getLink(['comments' => true]);
                 $result .= Html::hidden("items_id[$itemtype][$items_id]", ['value' => $items_id]);

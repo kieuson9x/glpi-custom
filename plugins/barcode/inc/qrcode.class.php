@@ -169,6 +169,30 @@ class PluginBarcodeQRcode
       return false;
    }
 
+   function generateSimpleQRcode($itemtype, $items_id, $rand, $number, $data)
+   {
+      global $CFG_GLPI;
+
+      /** @var CommonDBTM $item */
+      $item = new $itemtype();
+      $item->getFromDB($items_id);
+
+      $ticket = new Ticket();
+
+      $URLById = 'URL = ' . $CFG_GLPI['url_base'] . $itemtype::getFormURLWithID($items_id, false);
+      $URLTicket = 'URL = ' . $CFG_GLPI['url_base'] . $ticket::getFormURL(false) . '?custom_item_type=' . $itemtype . '&custom_item_id=' . $items_id;
+
+      $a_content = [];
+      $b_content = ['Tao ticket moi cho "' . $item->fields['name'] . '"'];
+
+      QRcode::png(
+         $URLTicket,
+         GLPI_PLUGIN_DOC_DIR . '/barcode/_tmp_' . $rand . '-' . $number . '.png',
+         QR_ECLEVEL_L,
+         4
+      );
+      return [GLPI_PLUGIN_DOC_DIR . '/barcode/_tmp_' . $rand . '-' . $number . '.png', $b_content];
+   }
 
 
    function cleanQRcodefiles($rand, $number)
@@ -202,7 +226,7 @@ class PluginBarcodeQRcode
          echo '<tr>';
          echo '<td>';
          echo __('Serial number') . " : </td><td>";
-         Dropdown::showYesNo("serialnumber", 1, -1, ['width' => '100']);
+         Dropdown::showYesNo("serialnumber", 0, -1, ['width' => '100']); // Todo_S: So se-ri mac dinh tu yes => no
          echo '</td>';
          echo '<td>';
          echo __('Display serial number') . " : </td><td>";
@@ -219,11 +243,11 @@ class PluginBarcodeQRcode
          echo '<tr>';
          echo '<td>';
          echo __('Inventory number') . " : </td><td>";
-         Dropdown::showYesNo("inventorynumber", 1, -1, ['width' => '100']);
+         Dropdown::showYesNo("inventorynumber", 0, -1, ['width' => '100']);
          echo '</td>';
          echo '<td>';
          echo __('Display inventory number') . " : </td><td>";
-         Dropdown::showYesNo("displayinventorynumber", 1, -1, ['width' => '100']);
+         Dropdown::showYesNo("displayinventorynumber", 0, -1, ['width' => '100']);
          echo '</td>';
          echo '</tr>';
       } else {
@@ -233,7 +257,7 @@ class PluginBarcodeQRcode
       echo '<tr>';
       echo '<td>';
       echo __('ID') . " : </td><td>";
-      Dropdown::showYesNo("id", 1, -1, ['width' => '100']);
+      Dropdown::showYesNo("id", 0, -1, ['width' => '100']);
       echo '</td>';
       echo '<td>';
       echo __('Display ID') . " : </td><td>";
@@ -245,7 +269,7 @@ class PluginBarcodeQRcode
          echo '<tr>';
          echo '<td>';
          echo __('UUID') . " : </td><td>";
-         Dropdown::showYesNo("uuid", 1, -1, ['width' => '100']);
+         Dropdown::showYesNo("uuid", 0, -1, ['width' => '100']);
          echo '</td>';
          echo '</tr>';
       } else {
@@ -256,7 +280,7 @@ class PluginBarcodeQRcode
          echo '<tr>';
          echo '<td>';
          echo __('Name') . " : </td><td>";
-         Dropdown::showYesNo("name", 1, -1, ['width' => '100']);
+         Dropdown::showYesNo("name", 0, -1, ['width' => '100']);
          echo '</td>';
          echo '</tr>';
       } else {
@@ -265,13 +289,13 @@ class PluginBarcodeQRcode
       echo '<tr>';
       echo '<td>';
       echo __('URL by inventory number') . " : </td><td>";
-      Dropdown::showYesNo("inventorynumberURL", 1, -1, ['width' => '100']);
+      Dropdown::showYesNo("inventorynumberURL", 0, -1, ['width' => '100']);
       echo '</td>';
       echo '</tr>';
       echo '<tr>';
       echo '<td>';
       echo __('UUID') . " : </td><td>";
-      Dropdown::showYesNo("uuid", 1, -1, ['width' => '100']);
+      Dropdown::showYesNo("uuid", 0, -1, ['width' => '100']);
       echo '</td>';
       echo '<td>';
       echo __('Display UUID') . " : </td><td>";
@@ -281,17 +305,17 @@ class PluginBarcodeQRcode
       echo '<tr>';
       echo '<td>';
       echo __('Name') . " : </td><td>";
-      Dropdown::showYesNo("name", 1, -1, ['width' => '100']);
+      Dropdown::showYesNo("name", 0, -1, ['width' => '100']);
       echo '</td>';
       echo '<td>';
       echo __('Display name') . " : </td><td>";
-      Dropdown::showYesNo("displayname", 1, -1, ['width' => '100']);
+      Dropdown::showYesNo("displayname", 0, -1, ['width' => '100']);
       echo '</td>';
       echo '</tr>';
       echo '<tr>';
       echo '<td>';
       echo __('Web page of the device') . " : </td><td>";
-      Dropdown::showYesNo("url", 1, -1, ['width' => '100']);
+      Dropdown::showYesNo("url", 0, -1, ['width' => '100']);
       echo '</td>';
       echo '<td>';
       echo __('Display web page of the device') . " : </td><td>";
@@ -313,7 +337,7 @@ class PluginBarcodeQRcode
       echo '<tr>';
       echo '<td>';
       echo __('Date QRcode') . " (" . date('Y-m-d') . ") : </td><td>";
-      Dropdown::showYesNo("qrcodedate", 1, -1, ['width' => '100']);
+      Dropdown::showYesNo("qrcodedate", 0, -1, ['width' => '100']);
       echo '</td>';
       echo '<td>';
       echo __('Display date QRcode') . " (" . date('Y-m-d') . ") : </td><td>";
