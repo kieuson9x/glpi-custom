@@ -4,3 +4,4 @@ files/_sessions/*
 vendor/*
 files/*
 public/*
+files/_cache/core/*
