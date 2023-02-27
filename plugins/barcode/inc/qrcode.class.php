@@ -158,13 +158,14 @@ class PluginBarcodeQRcode
 
       if (count($a_content) > 0) {
          $codeContents = implode("\n", $a_content);
+
          QRcode::png(
             $codeContents,
-            GLPI_PLUGIN_DOC_DIR . '/barcode/_tmp_' . $rand . '-' . $number . '.png',
+            GLPI_ROOT . '/pics/tmp_' . $rand . '-' . $number . '.png',
             QR_ECLEVEL_L,
             4
          );
-         return [GLPI_PLUGIN_DOC_DIR . '/barcode/_tmp_' . $rand . '-' . $number . '.png', $b_content];
+         return [GLPI_ROOT . '/pics/tmp_' . $rand . '-' . $number . '.png', $b_content];
       }
       return false;
    }
@@ -184,14 +185,13 @@ class PluginBarcodeQRcode
 
       $a_content = [];
       $b_content = ['Tao ticket moi cho "' . $item->fields['name'] . '"'];
-
       QRcode::png(
          $URLTicket,
-         GLPI_PLUGIN_DOC_DIR . '/barcode/_tmp_' . $rand . '-' . $number . '.png',
+         GLPI_ROOT . '/pics/_tmp_' . $rand . '-' . $number . '.png',
          QR_ECLEVEL_L,
          4
       );
-      return [GLPI_PLUGIN_DOC_DIR . '/barcode/_tmp_' . $rand . '-' . $number . '.png', $b_content];
+      return [GLPI_ROOT . '/pics/_tmp_' . $rand . '-' . $number . '.png', $b_content];
    }
 
 
