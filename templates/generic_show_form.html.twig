@@ -45,6 +45,7 @@
    {% set rand = random() %}
    {% set params  = params ?? [] %}
    {% set target       = params['target'] ?? item.getFormURL() %}
+   {% set itemId       = item.fields['id'] %}
    {% set withtemplate = params['withtemplate'] ?? '' %}
    {% set item_type = item.getType() %}
    {% set item_has_pictures = item.hasItemtypeOrModelPictures() %}
@@ -58,6 +59,39 @@
             <div class="row flex-row align-items-start flex-grow-1">
                <div class="row flex-row">
                   {% block form_fields %}
+                     {% if target == '/glpi/front/computer.form.php' %}
+                        <div class="center mb-3">
+                           <a id="computer_update_inventory_date_today_button" class="btn btn-primary me-2">
+                              <i class="fas fa-download"></i>
+                              <span>{{ _x('button', 'Cập nhật ngày kiểm kê hôm nay') }}</span>
+                           </a>
+                        </div>
+
+                        <script>
+                           $('#computer_update_inventory_date_today_button').on('click', function() {
+                              $.ajax({
+                                 url: CFG_GLPI.root_doc + '/ajax/computer_update_inventory_date_today.php',
+                                 type: 'GET',
+                                 datatype: 'json',
+                                 data: {
+                                    'computer_id': '{{ itemId }}',
+                                    'target': "{{ target }}"
+                                 },
+                                 success: function(response) {
+                                    if (response === 'success') {
+                                       alert("Đã cập nhật ngày kiểm kê thành ngày hôm nay!");
+                                       setTimeout(function(){// wait for 1 secs(2)
+                                          location.reload(); // then reload the page.(3)
+                                     }, 1000);
+                                    } else {
+                                       alert("Có lỗi khi cập nhật ngày kiểm kê thành ngày hôm nay!")
+                                    }
+                                 }
+                              });
+                           })
+                        </script>
+                     {% endif %}
+
                      {% if item.isField('name') %}
                         {{ fields.autoNameField(
                            'name',
