@@ -131,20 +131,20 @@ class KiemKe_Item extends CommonDBRelation
         $i      = 0;
         $rand    = mt_rand();
 
-        $submitPath = $CFG_GLPI['root_doc'] . "/src/CapNhatKiemKe.php";
+        $submitPath = $CFG_GLPI['root_doc'] . "/ajax/ajax_cap_nhat_kiem_ke.php";
         $userId = Session::getLoginUserID();
         $locationId = $item->getField('locations_id');
         $callback = $_SERVER['HTTP_REFERER'];
 
         echo "<div class='firstbloc'>";
-        echo "<form method='post' class='form-horizontal' name='kiemke_form$rand'
-         id='kiemke_form$rand'  action='" . $submitPath . "'>";
+        // echo "<form method='post' class='form-horizontal' name='kiemke_form$rand'
+        //  id='kiemke_form$rand'";
 
         echo '<table class="table">';
         echo '<tbody>';
         echo '<tr>';
         echo '<td>';
-        echo "<input type='submit' name='cap_nhat_kiem_ke' value=\"" . "Cập nhật kiểm kê" . "\" class='btn btn-primary' style='background: #5A9BD5; color: white'>";
+        echo "<input type='button' name='cap_nhat_kiem_ke' id='submit-button' value=\"" . "Cập nhật kiểm kê" . "\" class='btn btn-primary' style='background: #5A9BD5; color: white'>";
         echo '</td>';
 
         echo "<td>";
@@ -158,9 +158,41 @@ class KiemKe_Item extends CommonDBRelation
         echo "<input type='hidden' name='locations_id' value='$locationId'>";
         echo "<input type='hidden' name='callback' value='$callback'>";
 
+        echo "<script>
+        // Attach a click event handler to the submit button
+        $( document ).ready(function() {
+        $('#submit-button').on('click', function(e) {
+            e.preventDefault();
+          // Get the value of the text area
+          // Send an AJAX request to the API
+          $.ajax({
+            url: '$submitPath',
+            method: 'POST',
+            data: {
+                locations_id: $('input[name=\"locations_id\"').val(),
+                computer_id: $('input[name=\"computer_id\"').val(),
+                users_id: $('input[name=\"users_id\"').val(),
+                callback: $('input[name=\"callback\"').val(),
+                note: $('textarea[name=\"note\"').val(),
+            },
+            success: function(response) {
+              // Handle the response from the API
+              const res = JSON.parse(response);
+
+              if (!res.success && res.message) {
+                alert(res.message);
+              } else {
+                alert('Cập nhật thành công!');
+                window.location.reload();
+              }
+            },
+          });
+        });
+    });
+      </script>";
 
 
-        Html::closeForm();
+        // Html::closeForm();
         echo "</div>";
 
         $output = '<table class="table">';
