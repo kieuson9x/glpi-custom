@@ -59,7 +59,7 @@
             <div class="row flex-row align-items-start flex-grow-1">
                <div class="row flex-row">
                   {% block form_fields %}
-                     {% if target == '/glpi/front/computer.form.php' %}
+                     {# {% if target == '/glpi/front/computer.form.php' %}
                         <div class="center mb-3">
                            <a id="computer_update_inventory_date_today_button" class="btn btn-primary me-2">
                               <i class="fas fa-download"></i>
@@ -90,7 +90,7 @@
                               });
                            })
                         </script>
-                     {% endif %}
+                     {% endif %} #}
 
                      {% if item.isField('name') %}
                         {{ fields.autoNameField(

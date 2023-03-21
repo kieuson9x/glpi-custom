@@ -33,6 +33,7 @@
  * ---------------------------------------------------------------------
  */
 
+
 use Glpi\Socket;
 
 /**
@@ -44,16 +45,17 @@ class Computer extends CommonDBTM
     use Glpi\Features\Clonable;
     use Glpi\Features\Inventoriable;
 
-   // From CommonDBTM
+    // From CommonDBTM
     public $dohistory                   = true;
 
-    protected static $forward_entity_to = ['Item_Disk','ComputerVirtualMachine',
+    protected static $forward_entity_to = [
+        'Item_Disk', 'ComputerVirtualMachine',
         'Item_SoftwareVersion', 'Infocom',
         'NetworkPort', 'ReservationItem',
         'Item_OperatingSystem'
     ];
-   // Specific ones
-   ///Device container - format $device = array(ID,"device type","ID in device table","specificity value")
+    // Specific ones
+    ///Device container - format $device = array(ID,"device type","ID in device table","specificity value")
     public $devices                     = [];
 
     public static $rightname                   = 'computer';
@@ -101,38 +103,38 @@ class Computer extends CommonDBTM
 
         $ong = [];
         $this->addDefaultFormTab($ong)
-         ->addImpactTab($ong, $options)
-         ->addStandardTab('Item_OperatingSystem', $ong, $options)
-         ->addStandardTab('Item_Devices', $ong, $options)
-         ->addStandardTab('Item_Disk', $ong, $options)
-         ->addStandardTab('Item_SoftwareVersion', $ong, $options)
-         ->addStandardTab('Computer_Item', $ong, $options)
-         ->addStandardTab('NetworkPort', $ong, $options)
-         ->addStandardTab(Socket::class, $ong, $options)
-         ->addStandardTab('Item_RemoteManagement', $ong, $options)
-         ->addStandardTab('Infocom', $ong, $options)
-         ->addStandardTab('Contract_Item', $ong, $options)
-         ->addStandardTab('Document_Item', $ong, $options)
-         ->addStandardTab('ComputerVirtualMachine', $ong, $options)
-         ->addStandardTab('ComputerAntivirus', $ong, $options)
-         ->addStandardTab('KnowbaseItem_Item', $ong, $options)
-         ->addStandardTab('Ticket', $ong, $options)
-         ->addStandardTab('Item_Problem', $ong, $options)
-         ->addStandardTab('Change_Item', $ong, $options)
-         ->addStandardTab('ManualLink', $ong, $options)
-         ->addStandardTab('Certificate_Item', $ong, $options)
-         ->addStandardTab('Lock', $ong, $options)
-         ->addStandardTab('Notepad', $ong, $options)
-         ->addStandardTab('Reservation', $ong, $options)
-         ->addStandardTab('Domain_Item', $ong, $options)
-         ->addStandardTab('Appliance_Item', $ong, $options)
-         ->addStandardTab('DatabaseInstance', $ong, $options)
-         ->addStandardTab('RuleMatchedLog', $ong, $options)
-         ->addStandardTab('Log', $ong, $options);
+            ->addStandardTab('KiemKe_Item', $ong, $options)
+            ->addImpactTab($ong, $options)
+            ->addStandardTab('Item_OperatingSystem', $ong, $options)
+            ->addStandardTab('Item_Devices', $ong, $options)
+            ->addStandardTab('Item_Disk', $ong, $options)
+            ->addStandardTab('Item_SoftwareVersion', $ong, $options)
+            ->addStandardTab('Computer_Item', $ong, $options)
+            ->addStandardTab('NetworkPort', $ong, $options)
+            ->addStandardTab(Socket::class, $ong, $options)
+            ->addStandardTab('Item_RemoteManagement', $ong, $options)
+            ->addStandardTab('Infocom', $ong, $options)
+            ->addStandardTab('Contract_Item', $ong, $options)
+            ->addStandardTab('Document_Item', $ong, $options)
+            ->addStandardTab('ComputerVirtualMachine', $ong, $options)
+            ->addStandardTab('ComputerAntivirus', $ong, $options)
+            ->addStandardTab('KnowbaseItem_Item', $ong, $options)
+            ->addStandardTab('Ticket', $ong, $options)
+            ->addStandardTab('Item_Problem', $ong, $options)
+            ->addStandardTab('Change_Item', $ong, $options)
+            ->addStandardTab('ManualLink', $ong, $options)
+            ->addStandardTab('Certificate_Item', $ong, $options)
+            ->addStandardTab('Lock', $ong, $options)
+            ->addStandardTab('Notepad', $ong, $options)
+            ->addStandardTab('Reservation', $ong, $options)
+            ->addStandardTab('Domain_Item', $ong, $options)
+            ->addStandardTab('Appliance_Item', $ong, $options)
+            ->addStandardTab('DatabaseInstance', $ong, $options)
+            ->addStandardTab('RuleMatchedLog', $ong, $options)
+            ->addStandardTab('Log', $ong, $options);
 
         return $ong;
     }
-
 
     public function post_restoreItem()
     {
@@ -158,14 +160,14 @@ class Computer extends CommonDBTM
         $update_count = count($this->updates ?? []);
         $input = Toolbox::addslashes_deep($this->fields);
         for ($i = 0; $i < $update_count; $i++) {
-           // Update contact of attached items
+            // Update contact of attached items
             if ($this->updates[$i] == 'contact_num' && $CFG_GLPI['is_contact_autoupdate']) {
                 $changes['contact_num'] = $input['contact_num'];
             }
             if ($this->updates[$i] == 'contact' && $CFG_GLPI['is_contact_autoupdate']) {
                 $changes['contact'] = $input['contact'];
             }
-           // Update users and groups of attached items
+            // Update users and groups of attached items
             if (
                 $this->updates[$i] == 'users_id'
                 && $CFG_GLPI['is_user_autoupdate']
@@ -178,14 +180,14 @@ class Computer extends CommonDBTM
             ) {
                 $changes['groups_id'] = $input['groups_id'];
             }
-           // Update state of attached items
+            // Update state of attached items
             if (
                 ($this->updates[$i] == 'states_id')
                 && ($CFG_GLPI['state_autoupdate_mode'] < 0)
             ) {
                 $changes['states_id'] = $input['states_id'];
             }
-           // Update loction of attached items
+            // Update loction of attached items
             if (
                 $this->updates[$i] == 'locations_id'
                 && $CFG_GLPI['is_location_autoupdate']
@@ -197,7 +199,7 @@ class Computer extends CommonDBTM
         if (count($changes)) {
             $update_done = false;
 
-           // Propagates the changes to linked items
+            // Propagates the changes to linked items
             foreach ($CFG_GLPI['directconnect_types'] as $type) {
                 $items_result = $DB->request(
                     [
@@ -212,8 +214,8 @@ class Computer extends CommonDBTM
                 );
                 $item      = new $type();
                 foreach ($items_result as $data) {
-                     $tID = $data['items_id'];
-                     $item->getFromDB($tID);
+                    $tID = $data['items_id'];
+                    $item->getFromDB($tID);
                     if (!$item->getField('is_global')) {
                         $changes['id'] = $item->getField('id');
                         if ($item->update($changes)) {
@@ -223,14 +225,14 @@ class Computer extends CommonDBTM
                 }
             }
 
-           //fields that are not present for devices
+            //fields that are not present for devices
             unset($changes['groups_id']);
             unset($changes['users_id']);
             unset($changes['contact_num']);
             unset($changes['contact']);
 
             if (count($changes) > 0) {
-               // Propagates the changes to linked devices
+                // Propagates the changes to linked devices
                 foreach ($CFG_GLPI['itemdevices'] as $device) {
                     $item = new $device();
                     $devices_result = $DB->request(
@@ -245,9 +247,9 @@ class Computer extends CommonDBTM
                         ]
                     );
                     foreach ($devices_result as $data) {
-                           $tID = $data['id'];
-                           $item->getFromDB($tID);
-                           $changes['id'] = $item->getField('id');
+                        $tID = $data['id'];
+                        $item->getFromDB($tID);
+                        $changes['id'] = $item->getField('id');
                         if ($item->update($changes)) {
                             $update_done = true;
                         }
@@ -349,16 +351,16 @@ class Computer extends CommonDBTM
         if ($isadmin) {
             $actions += [
                 'Item_OperatingSystem' . MassiveAction::CLASS_ACTION_SEPARATOR . 'update'
-               => OperatingSystem::getTypeName(),
+                => OperatingSystem::getTypeName(),
                 'Computer_Item' . MassiveAction::CLASS_ACTION_SEPARATOR . 'add'
-               => "<i class='fa-fw ti ti-plug'></i>" .
-                  _x('button', 'Connect'),
+                => "<i class='fa-fw ti ti-plug'></i>" .
+                    _x('button', 'Connect'),
                 'Item_SoftwareVersion' . MassiveAction::CLASS_ACTION_SEPARATOR . 'add'
-               => "<i class='fa-fw fas fa-laptop-medical'></i>" .
-                  _x('button', 'Install'),
+                => "<i class='fa-fw fas fa-laptop-medical'></i>" .
+                    _x('button', 'Install'),
                 'Item_SoftwareLicense' . MassiveAction::CLASS_ACTION_SEPARATOR . 'add'
-               => "<i class='fa-fw " . SoftwareLicense::getIcon() . "'></i>" .
-                  _x('button', 'Add a license'),
+                => "<i class='fa-fw " . SoftwareLicense::getIcon() . "'></i>" .
+                    _x('button', 'Add a license'),
 
             ];
 
@@ -573,7 +575,7 @@ class Computer extends CommonDBTM
             'datatype'           => 'dropdown'
         ];
 
-       // add operating system search options
+        // add operating system search options
         $tab = array_merge($tab, Item_OperatingSystem::rawSearchOptionsToAdd(get_class($this)));
 
         $tab = array_merge($tab, Notepad::rawSearchOptionsToAdd());
