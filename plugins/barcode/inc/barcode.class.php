@@ -326,10 +326,11 @@ class PluginBarcodeBarcode
 
       $pdf = new Cezpdf($size, $orientation);
       $pdf->tempPath = GLPI_TMP_DIR;
-      $pdf->selectFont(Plugin::getPhpDir('barcode') . "/lib/ezpdf/fonts/Helvetica.afm");
+      $pdf->selectFont(Plugin::getPhpDir('barcode') . "/lib/ezpdf/fonts/Arial Unicode MS Font.ttf");
       $pdf->ezSetMargins($config['marginTop'], $config['marginBottom'], $config['marginLeft'], $config['marginRight']);
-      $pdf->ezStartPageNumbers($pdf->ez['pageWidth'] - 30, 10, 10, 'left', '{PAGENUM} / {TOTALPAGENUM}') .
-         $width   = $config['maxCodeWidth'];
+      $pdf->ezStartPageNumbers($pdf->ez['pageWidth'] - 30, 10, 10, 'left', '{PAGENUM} / {TOTALPAGENUM}');
+
+      $width   = $config['maxCodeWidth'];
       $height  = $config['maxCodeHeight'];
       $marginH = $config['marginHorizontal'];
       $marginV = $config['marginVertical'];
@@ -429,15 +430,38 @@ class PluginBarcodeBarcode
                }
                $txtHeight = 0;
                for ($i = 0; $i < count($displayData); $i++) {
-                  $pdf->addTextWrap(
-                     $x,
-                     $y - ($txtSpacing + $txtHeight),
-                     $txtSize,
-                     $displayData[$i],
-                     $width,
-                     'center'
-                  );
-                  $txtHeight += $txtSpacing / 2 + $txtSize;
+                  mb_internal_encoding('utf-8');
+                  $lines = explode("\n", wordwrap($displayData[$i], 30));
+
+                  $result = [];
+                  foreach ($lines as $line) {
+                     $line = trim($line);
+                     if (!empty($line)) {
+                        $result[] = $line;
+                     }
+                  }
+
+                  for ($i = 0; $i < count($result); $i++) {
+                     $pdf->addTextWrap(
+                        $x,
+                        $y - ($txtSpacing + $txtHeight),
+                        $txtSize,
+                        $result[$i],
+                        $width,
+                        'center'
+                     );
+                     $txtHeight += $txtSpacing / 2 + $txtSize;
+                  }
+
+                  // $pdf->addTextWrap(
+                  //    $x,
+                  //    $y - ($txtSpacing + $txtHeight),
+                  //    $txtSize,
+                  //    $data,
+                  //    $width,
+                  //    'full'
+                  // );
+                  // $txtHeight += $txtSpacing / 2 + $txtSize;
                }
                if ($p_params['border']) {
                   $pdf->Rectangle(

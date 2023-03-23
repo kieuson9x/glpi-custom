@@ -184,7 +184,7 @@ class PluginBarcodeQRcode
       $URLTicket = 'URL = ' . $CFG_GLPI['url_base'] . $ticket::getFormURL(false) . '?custom_item_type=' . $itemtype . '&custom_item_id=' . $items_id;
 
       $a_content = [];
-      $b_content = ['Tao ticket moi cho "' . $item->fields['name'] . '"'];
+      $b_content = ['Tạo ticket mới cho - ' . $item->fields['name']];
       QRcode::png(
          $URLTicket,
          GLPI_ROOT . '/pics/_tmp_' . $rand . '-' . $number . '.png',
