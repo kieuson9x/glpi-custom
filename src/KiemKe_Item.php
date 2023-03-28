@@ -123,17 +123,27 @@ class KiemKe_Item extends CommonDBRelation
             ],
             'WHERE'     => [
                 "glpi_kiemke_items.computer_id" => $ID
-            ], //to be filled
+            ],
+            'ORDER'  => ['glpi_kiemke_items.inventory_date DESC']
         ];
 
         $iterator = $DB->request($criteria);
         $number = count($iterator);
+
+        $criteriaLocations = [
+            'SELECT'    => [
+                '*',
+            ],
+            'FROM'      => "glpi_locations",
+        ];
+        $iteratorLocations = $DB->request($criteriaLocations);
+
         $i      = 0;
         $rand    = mt_rand();
 
         $submitPath = $CFG_GLPI['root_doc'] . "/ajax/ajax_cap_nhat_kiem_ke.php";
         $userId = Session::getLoginUserID();
-        $locationId = $item->getField('locations_id');
+        $locationsId = $item->getField('locations_id');
         $callback = $_SERVER['HTTP_REFERER'];
 
         echo "<div class='firstbloc'>";
@@ -144,7 +154,18 @@ class KiemKe_Item extends CommonDBRelation
         echo '<tbody>';
         echo '<tr>';
         echo '<td>';
-        echo "<input type='button' name='cap_nhat_kiem_ke' id='submit-button' value=\"" . "Cập nhật kiểm kê" . "\" class='btn btn-primary' style='background: #5A9BD5; color: white'>";
+        echo "<input type='button' name='cap_nhat_kiem_ke' id='submit-button' value=\"" . "Cập nhật kiểm kê" . "\" class='btn btn-primary' style='background: #5A9BD5; color: white; margin-right: 15px; min-width: 200px;'>";
+
+
+
+        echo "<select class='custom-select custom-select-sm' name='locations_id' style='min-width: 200px;'>";
+        foreach ($iteratorLocations as $row) {
+            $locationsOptionId = $row['id'];
+            $locationName = $row['name'];
+            $isSelected = $locationsOptionId == $locationsId;
+            echo "<option value='$locationsOptionId' " .  ($isSelected ? "selected" : "") . ">$locationName</option>";
+        }
+        echo "</select>";
         echo '</td>';
 
         echo "<td>";
@@ -155,7 +176,7 @@ class KiemKe_Item extends CommonDBRelation
 
         echo "<input type='hidden' name='computer_id' value='$ID'>";
         echo "<input type='hidden' name='users_id' value='$userId'>";
-        echo "<input type='hidden' name='locations_id' value='$locationId'>";
+        // echo "<input type='hidden' name='locations_id' value='$locationsId'>";
         echo "<input type='hidden' name='callback' value='$callback'>";
 
         echo "<script>
@@ -169,7 +190,7 @@ class KiemKe_Item extends CommonDBRelation
             url: '$submitPath',
             method: 'POST',
             data: {
-                locations_id: $('input[name=\"locations_id\"').val(),
+                locations_id: $('select[name=\"locations_id\"').val(),
                 computer_id: $('input[name=\"computer_id\"').val(),
                 users_id: $('input[name=\"users_id\"').val(),
                 callback: $('input[name=\"callback\"').val(),
