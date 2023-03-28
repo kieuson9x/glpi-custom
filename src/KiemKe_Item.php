@@ -93,10 +93,19 @@ class KiemKe_Item extends CommonDBRelation
         $rand         = mt_rand();
         $is_recursive = $item->isRecursive();
 
+        $submitPath = $CFG_GLPI['root_doc'] . "/ajax/ajax_cap_nhat_kiem_ke.php";
+        $userId = Session::getLoginUserID();
+        $user = new User();
+        $user->getFromDB($userId);
+        $currentUserEntitiesId = $user->fields['entities_id'];
+        $locationsId = $item->getField('locations_id');
+        $callback = $_SERVER['HTTP_REFERER'];
+
         $criteria = [
             'SELECT'    => [
                 'glpi_kiemke_items.inventory_date',
-                'glpi_locations.name as location_name',
+                'L2.name as prev_locations_name',
+                'L1.name as location_name',
                 'glpi_users.name as user_name',
                 'glpi_kiemke_items.note',
             ],
@@ -108,10 +117,10 @@ class KiemKe_Item extends CommonDBRelation
                         "glpi_kiemke_items"     => 'computer_id'
                     ]
                 ],
-                "glpi_locations" => [
+                "glpi_locations AS L1" => [
                     'ON'  => [
-                        "glpi_locations"   => 'id',
-                        "glpi_kiemke_items"     => 'locations_id'
+                        "L1"   => 'id',
+                        "glpi_kiemke_items"     => 'locations_id',
                     ]
                 ],
                 "glpi_users" => [
@@ -119,7 +128,13 @@ class KiemKe_Item extends CommonDBRelation
                         "glpi_users"   => 'id',
                         "glpi_kiemke_items"     => 'users_id'
                     ]
-                ]
+                ],
+                "glpi_locations AS L2" => [
+                    'ON'  => [
+                        "L2"   => 'id',
+                        "glpi_kiemke_items"     => 'prev_locations_id',
+                    ]
+                ],
             ],
             'WHERE'     => [
                 "glpi_kiemke_items.computer_id" => $ID
@@ -135,16 +150,16 @@ class KiemKe_Item extends CommonDBRelation
                 '*',
             ],
             'FROM'      => "glpi_locations",
+            'WHERE'     => [
+                'entities_id' => $currentUserEntitiesId
+            ]
         ];
         $iteratorLocations = $DB->request($criteriaLocations);
 
         $i      = 0;
         $rand    = mt_rand();
 
-        $submitPath = $CFG_GLPI['root_doc'] . "/ajax/ajax_cap_nhat_kiem_ke.php";
-        $userId = Session::getLoginUserID();
-        $locationsId = $item->getField('locations_id');
-        $callback = $_SERVER['HTTP_REFERER'];
+
 
         echo "<div class='firstbloc'>";
         // echo "<form method='post' class='form-horizontal' name='kiemke_form$rand'
@@ -175,8 +190,8 @@ class KiemKe_Item extends CommonDBRelation
         echo "</table>";
 
         echo "<input type='hidden' name='computer_id' value='$ID'>";
-        echo "<input type='hidden' name='users_id' value='$userId'>";
-        // echo "<input type='hidden' name='locations_id' value='$locationsId'>";
+        // echo "<input type='hidden' name='users_id' value='$userId'>";
+        echo "<input type='hidden' name='current_locations_id' value='$locationsId'>";
         echo "<input type='hidden' name='callback' value='$callback'>";
 
         echo "<script>
@@ -190,9 +205,9 @@ class KiemKe_Item extends CommonDBRelation
             url: '$submitPath',
             method: 'POST',
             data: {
+                current_locations_id: $('input[name=\"current_locations_id\"').val(),
                 locations_id: $('select[name=\"locations_id\"').val(),
                 computer_id: $('input[name=\"computer_id\"').val(),
-                users_id: $('input[name=\"users_id\"').val(),
                 callback: $('input[name=\"callback\"').val(),
                 note: $('textarea[name=\"note\"').val(),
             },
@@ -220,7 +235,8 @@ class KiemKe_Item extends CommonDBRelation
         $output .= '<thead>' .
             '<tr >' .
             '<th style="background-color: #4473C5; color: white;">Ngày kiểm kê</th>' .
-            '<th style="background-color: #4473C5; color: white;">Vị trí</th>' .
+            '<th style="background-color: #4473C5; color: white;">Vị trí trước kiểm kê</th>' .
+            '<th style="background-color: #4473C5; color: white;">Vị trí khi kiểm kê</th>' .
             '<th style="background-color: #4473C5; color: white;">Người kiểm kê</th>' .
             '<th style="background-color: #4473C5; color: white;">Ghi chú</th>' .
             '</tr>' .
@@ -239,6 +255,7 @@ class KiemKe_Item extends CommonDBRelation
 
             $output .= '<tr ' . "style=\"background:$color\">";
             $output .= '<td>' . $formatted_date . '</td>';
+            $output .= '<td>' . $row['prev_locations_name'] . '</td>';
             $output .= '<td>' . $row['location_name'] . '</td>';
             $output .= '<td>' . $row['user_name'] . '</td>';
             $output .= '<td>' . $row['note'] . '</td>';

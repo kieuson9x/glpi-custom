@@ -16,7 +16,7 @@ if (!isset($_POST['locations_id']) || $_POST['locations_id'] == 0) {
     $result = false;
 }
 
-if (!isset($_POST['callback']) || !isset($_POST['computer_id']) || !isset($_POST['users_id'])) {
+if (!isset($_POST['callback']) || !isset($_POST['computer_id'])) {
     $result = false;
 }
 
@@ -41,8 +41,9 @@ if ($result) {
     $payload = [
         'computer_id'            => $_POST['computer_id'],
         'inventory_date'         => date("Y-m-d H:i"),
-        'users_id'            => $_POST['users_id'],
+        'users_id'            => Session::getLoginUserID(),
         'locations_id'            => $_POST['locations_id'],
+        'prev_locations_id'      => $_POST['current_locations_id'],
         'note'            => isset($_POST['note']) ? htmlspecialchars($_POST['note']) : '',
     ];
 
