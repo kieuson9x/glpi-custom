@@ -150,10 +150,16 @@ class KiemKe_Item extends CommonDBRelation
                 '*',
             ],
             'FROM'      => "glpi_locations",
-            'WHERE'     => [
-                'entities_id' => $currentUserEntitiesId
-            ]
         ];
+
+        if ($currentUserEntitiesId > 0) {
+            $criteriaLocations = array_merge($criteriaLocations, [
+                'WHERE'     => [
+                    'entities_id' => $currentUserEntitiesId
+                ]
+            ]);
+        }
+
         $iteratorLocations = $DB->request($criteriaLocations);
 
         $i      = 0;
