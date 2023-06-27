@@ -1,6 +1,7 @@
 <?php
-class DB extends DBmysql {
-   public $dbhost = 'localhost';
+class DB extends DBmysql
+{
+   public $dbhost = 'localhost:3307';
    public $dbuser = 'root';
    public $dbpassword = '';
    public $dbdefault = 'glpi_db';

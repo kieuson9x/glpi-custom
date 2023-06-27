@@ -35,6 +35,8 @@
 
 use Glpi\Event;
 
+global $DB;
+
 include('../inc/includes.php');
 
 Session::checkLoginUser();
@@ -51,7 +53,7 @@ $date_fields = [
 ];
 
 foreach ($date_fields as $date_field) {
-   //handle not clean dates...
+    //handle not clean dates...
     if (
         isset($_POST["_$date_field"])
         && isset($_POST[$date_field])
@@ -72,6 +74,29 @@ if (isset($_POST["add"])) {
     $track->check(-1, CREATE, $_POST);
 
     if ($track->add($_POST)) {
+        // Todo_S: after success created, call DB and update original computer's status to "Bảo trì"
+        $originalItemType = $_POST['itemtype'];
+        if ($originalItemType === "Computer") {
+            $originalItemsId = reset($_POST['items_id'][$originalItemType]);
+            $computer = new Computer();
+            $computer->getFromDB(intval($originalItemsId));
+            $state = new State();
+            $state->getFromDBByCrit(['name' => 'Bảo trì']);
+
+            $result = $DB->update(
+                $computer->getTable(),
+                [
+                    'states_id' =>  $state->fields['id']
+                ],
+                [
+                    'id' => $originalItemsId
+                ]
+            );
+            if ($result = 1) {
+                Html::redirect($computer->getLinkURL());
+            }
+        }
+
         if ($_SESSION['glpibackcreated']) {
             Html::redirect($track->getLinkURL());
         }
@@ -81,10 +106,40 @@ if (isset($_POST["add"])) {
     if (!$track::canUpdate()) {
         Html::displayRightError();
     }
-    $track->update($_POST);
+
+    // Todo_S: after update, if new status is closed or solved, we can update back Computer's status to new.
+    if ($track->update($_POST)) {
+        $ticketId = $_GET["id"];
+        $query = "SELECT itemtype, items_id FROM `glpi_items_tickets` WHERE tickets_id = $ticketId";
+        $result = $DB->query($query);
+        if ($result) {
+            $data = $DB->fetchAssoc($result);
+            if ($data) {
+                $originalItemType = $data['itemtype'];
+                $ticketDoneStatuses = [CommonITILObject::SOLVED, CommonITILObject::CLOSED];
+                if ($originalItemType === "Computer" && in_array(intval($_POST['status']), $ticketDoneStatuses)) {
+                    $originalItemsId = $data['items_id'];
+                    $computer = new Computer();
+                    $computer->getFromDB(intval($originalItemsId));
+                    $state = new State();
+                    $state->getFromDBByCrit(['name' => 'Mới']);
+
+                    $result = $DB->update(
+                        $computer->getTable(),
+                        [
+                            'states_id' =>  $state->fields['id']
+                        ],
+                        [
+                            'id' => $originalItemsId
+                        ]
+                    );
+                }
+            }
+        }
+    }
 
     if (isset($_POST['kb_linked_id'])) {
-       //if solution should be linked to selected KB entry
+        //if solution should be linked to selected KB entry
         $params = [
             'knowbaseitems_id' => $_POST['kb_linked_id'],
             'itemtype'         => $track->getType(),
@@ -111,7 +166,7 @@ if (isset($_POST["add"])) {
 
     if ($track->can($_POST["id"], READ)) {
         $toadd = '';
-       // Copy solution to KB redirect to KB
+        // Copy solution to KB redirect to KB
         if (isset($_POST['_sol_to_kb']) && $_POST['_sol_to_kb']) {
             $toadd = "&_sol_to_kb=1";
         }
